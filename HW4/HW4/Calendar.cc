@@ -2,23 +2,22 @@
 #include<sstream>
 using namespace std;
 
+const int Calendar::months[12] = {
+	 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+};
+
 Calendar::Calendar(){
-	int temp[24];
-	times = temp;
-
-	vector<CalEvent> temp2(0);
-	events = &temp2;
-
-	for (int i = 0; i < 24; i++)
-		times[i] = 0;
-
-	size = 0;
+	events = vector<CalEvent> (0);
+	elements = 0;
 }
 
 Calendar::Calendar(const Calendar& _cal){
 	events = _cal.events;
-	size = _cal.size;
-	times = _cal.times;
+	elements = _cal.elements;
+}
+
+int Calendar::size() {
+	return elements;
 }
 
 bool Calendar::insert(int _year, int _month, int _day, int _hour, int _length, string _title){
@@ -32,33 +31,101 @@ bool Calendar::insert(int _year, int _month, int _day, int _hour, int _length, s
 
 	if (!validMonth(_month)){
 		temp = "Input \"" + inttostr(_month) + "\" invalid. Must be greater than or equal to 1 and less than or equal to 12.";
-		throw temp.c_str();
+		throw temp;
 	}
 
-	if (!validDay(_day, _month)){
+	if (!validDay(_day, _month, _year)){
 		temp = "Input \"" + inttostr(_day) + "\" invalid. Must be greater than or equal to 1 and less than or equal to "
 			+ inttostr(months[_month]) + " for month " + inttostr(_month) + ".";
-		throw temp.c_str();
+		throw temp;
 	}
 
 	if (!validLength(_hour, _length)){
 		temp = "Input \"" + inttostr(_length) + "\" invalid. The length of your event cannot extend past midnight.";
-		throw temp.c_str();
+		throw temp;
 	}
 
-	(*events).push_back(CalEvent(_year, _month, _day, _hour, _length, _title));
-	size++;
+	CalEvent tempEvent(_year, _month, _day, _hour, _length, _title);
 
-	for (int i = _hour; i < _hour + _length; i++){
-		if (times[i] == 1)
-			flag == true;
-		else
-			times[i] = 1;
+	int tempArr1[24], tempArr2[24];
+
+	for (int i = 0; i < 24; i++){
+		tempArr1[i] = 0;
+		tempArr2[i] = 0;
+
+		if (i >= tempEvent.getHour() && i < tempEvent.getHour() + tempEvent.getLength()){
+			tempArr1[i] = 1;
+		}
 	}
+
+	for (int k = 0; k < events.size(); k++){
+		for (int i = 0; i < 24; i++){
+			tempArr2[i] = 0;
+
+			if (i >= events.at(k).getHour() && i < events.at(k).getHour() + events.at(k).getLength()){
+				tempArr2[i] = 1;
+			}
+		}
+
+		for (int i = 0; i < 24; i++){
+			if (tempArr1[i] == 1 && tempArr2[i] == 1){
+				flag = true;
+			}
+		}
+	}
+
+	events.push_back(tempEvent);
+	elements++;
+	sort();
+
 	return flag;
 }
 
-bool Calendar::validDay(int _day, int _month){
+bool Calendar::insert(string _str){
+
+}
+
+void Calendar::sort(){
+	int low;
+
+	for (int j = 0; j < events.size(); j++){
+		low = j;
+		for (int i = j + 1; i < events.size(); i++){
+			if ( compare(events[i], events[low]) < 0) //events[i] < events[low]
+				low = i;
+		}
+		CalEvent temp = events[j];
+		events[j] = events[low];
+		events[low] = temp;
+	}
+}
+
+//returns 0 if the two CalEvents are the same, positive if the first argument is larger, and negative if the second argument is smaller
+int Calendar::compare(CalEvent eve1, CalEvent eve2){
+	int valList1[4] = { eve1.getYear(), eve1.getMonth(), eve1.getDay(), eve1.getHour() };
+	int valList2[4] = { eve2.getYear(), eve2.getMonth(), eve2.getDay(), eve2.getHour() };
+
+	for (int i = 0; i < 4; i++){
+		if (valList1[i] > valList2[i])
+			return 1;
+		if (valList1[i] < valList2[i])
+			return -1;
+	}
+
+	return 0;
+}
+
+void Calendar::clear(){
+	events.clear();
+	elements = 0;
+}
+
+bool Calendar::validDay(int _day, int _month, int _year){
+	if (_month == 2 && _year % 4 == 0){
+		if (_year % 100 == 0 && _year % 400 != 0){
+			return false;
+		}
+	}
 	if (_day <= months[_month - 1] && _day > 0)
 		return true;
 	return false;
@@ -77,18 +144,27 @@ bool Calendar::validMonth(int _month){
 }
 
 bool Calendar::validLength(int _hour, int _length){
-	if (_hour + _length > 23 || _hour + _length <= 0)
+	if (_hour + _length > 23 || _length < 0)
 		return false;
 	return true;
 }
 
 Calendar Calendar::operator=(const Calendar _cal){
 	events = _cal.events;
-	size = _cal.size;
-	times = _cal.times;
+	elements = _cal.elements;
+	return *this;
 }
 
+/*
+Calendar Calendar::operator|(const Calendar _cal){
+	//Calendar temp(_cal)
+}*/
+
 /*----------------------------------------------------------------------------------------------------------------*/
+
+CalEvent::CalEvent(){
+
+}
 
 CalEvent::CalEvent(int _year, int _month, int _day, int _hour, int _length, string _title){
 	year = _year;
