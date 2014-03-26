@@ -16,11 +16,7 @@ Calendar::Calendar(const Calendar& _cal){
 	elements = _cal.elements;
 }
 
-int Calendar::size() {
-	return elements;
-}
-
-bool Calendar::insert(int _year, int _month, int _day, int _hour, int _length, string _title){
+bool Calendar::insert(int _year, int _month, int _day, int _hour, int _length, const string &_title){
 	bool flag = false;
 	string temp;
 
@@ -81,8 +77,55 @@ bool Calendar::insert(int _year, int _month, int _day, int _hour, int _length, s
 	return flag;
 }
 
-bool Calendar::insert(string _str){
+bool Calendar::insert(const string &_str){
+	string temp = _str, token;
+	int year, month, day, hour, length;
 
+	token = temp.substr(0, temp.find("-"));
+	year = atoi(token);
+	temp.erase(0, temp.find("-") + 1);
+
+	token = temp.substr(0, temp.find("-"));
+	month = atoi(token);
+	temp.erase(0, temp.find("-") + 1);
+
+	token = temp.substr(0, temp.find("T"));
+	day = atoi(token);
+	temp.erase(0, temp.find("T") + 1);
+
+	token = temp.substr(0, temp.find("/"));
+	hour = atoi(token);
+	temp.erase(0, temp.find("/") + 3);
+
+	token = temp.substr(0, temp.find("H"));
+	length = atoi(token);
+	temp.erase(0, temp.find("H") + 2);
+
+	//cout << year << endl << month << endl << day << endl << hour << endl << length << endl << temp << endl;
+
+	return insert(year, month, day, hour, length, temp);
+}
+
+int Calendar::size() const{
+	return elements;
+}
+
+void Calendar::print(){
+	string temp;
+	for (unsigned int i = 0; i < events.size(); i++){
+		temp = inttostr(events.at(i).getYear()) + "-" + inttostr(events.at(i).getMonth()) + "-" + inttostr(events.at(i).getDay()) + "T" + inttostr(events.at(i).getHour())
+			+ "/PT" + inttostr(events.at(i).getLength()) + "H " + events.at(i).getTitle() + "\n";
+		cout << temp;
+	}
+}
+
+void Calendar::print(ostream &os) const{
+	string temp;
+	for (unsigned int i = 0; i < events.size(); i++){
+		temp = inttostr(events.at(i).getYear()) + "-" + inttostr(events.at(i).getMonth()) + "-" + inttostr(events.at(i).getDay()) + "T" + inttostr(events.at(i).getHour())
+			+ "/PT" + inttostr(events.at(i).getLength()) + "H " + events.at(i).getTitle() + "\n";
+		os << temp;
+	}
 }
 
 void Calendar::sort(){
@@ -100,10 +143,22 @@ void Calendar::sort(){
 	}
 }
 
-//returns 0 if the two CalEvents are the same, positive if the first argument is larger, and negative if the second argument is smaller
+//returns 0 if the two CalEvents are the same, positive if the first argument is larger, and negative if the second argument is larger
 int Calendar::compare(CalEvent eve1, CalEvent eve2){
 	int valList1[4] = { eve1.getYear(), eve1.getMonth(), eve1.getDay(), eve1.getHour() };
 	int valList2[4] = { eve2.getYear(), eve2.getMonth(), eve2.getDay(), eve2.getHour() };
+
+	if (valList1[0] == valList2[0] && valList1[1] == valList2[1] && valList1[2] == valList2[2] && valList1[3] == valList2[3]){
+		if (eve1.getTitle().compare(eve2.getTitle()) < 0){
+			return -1;
+		}
+		else if (eve1.getTitle().compare(eve2.getTitle()) > 0){
+			return 1;
+		}
+		else {
+			return 0;
+		}
+	}
 
 	for (int i = 0; i < 4; i++){
 		if (valList1[i] > valList2[i])
@@ -149,16 +204,21 @@ bool Calendar::validLength(int _hour, int _length){
 	return true;
 }
 
+vector<CalEvent> Calendar::getEvents(){
+	return events;
+}
+
 Calendar Calendar::operator=(const Calendar _cal){
 	events = _cal.events;
 	elements = _cal.elements;
 	return *this;
 }
 
-/*
+
 Calendar Calendar::operator|(const Calendar _cal){
-	//Calendar temp(_cal)
-}*/
+	Calendar tempCal(_cal);
+	
+}
 
 /*----------------------------------------------------------------------------------------------------------------*/
 
@@ -175,34 +235,42 @@ CalEvent::CalEvent(int _year, int _month, int _day, int _hour, int _length, stri
 	title = _title;
 }
 
-int CalEvent:: getYear(){
+int CalEvent::getYear() const{
 	return year;
 }
 
-int CalEvent::getMonth(){
+int CalEvent::getMonth() const{
 	return month;
 }
 
-int CalEvent::getDay(){
+int CalEvent::getDay() const{
 	return day;
 }
 
-int CalEvent::getHour(){
+int CalEvent::getHour() const{
 	return hour;
 }
 
-int CalEvent::getLength(){
+int CalEvent::getLength() const{
 	return length;
 }
 
-string CalEvent::getTitle(){
+string CalEvent::getTitle() const{
 	return title;
 }
 
 /*----------------------------------------------------------------------------------------------------------------*/
 
-string Calendar::inttostr(int _num){
+string Calendar::inttostr(int _num) const{
 	ostringstream conv;
 	conv << _num;
 	return conv.str();
+}
+
+int Calendar::atoi(string str) const{
+	int temp;
+	istringstream buffer(str);
+	buffer >> temp;
+
+	return temp;
 }

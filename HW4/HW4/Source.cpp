@@ -6,15 +6,12 @@ using namespace std;
 int main(){
 
 	Calendar owen;
-	
-	owen.insert(2014, 7, 12, 2, 0, "Chase last b-day");
-	cout << owen.insert(2013, 7, 12, 2, 19, "Chase b-day") << endl;
+	owen.insert("2014-3-26T10/PT01H Right now");
+	owen.insert(2014, 7, 12, 2, 5, "c");
+	owen.insert(2014, 7, 12, 2, 5, "b");
+	owen.insert(2014, 7, 12, 2, 5, "a");
 
-	owen.to_string();
-
-	cout << "\n";
-
-	owen.to_string();
+	owen.print();
 
 	system("pause");
 	return 0;

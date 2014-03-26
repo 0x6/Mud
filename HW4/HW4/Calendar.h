@@ -1,6 +1,7 @@
 #ifndef CALENDAR_H_
 #define CALENDAR_H_
 
+#include"CalendarBase.h"
 #include<iostream>
 #include<vector>
 #include<string>
@@ -11,43 +12,39 @@ public:
 	CalEvent(int, int, int, int, int, std::string);
 
 	std::string label();
-	int getYear();
-	int getMonth();
-	int getDay();
-	int getHour();
-	int getLength();
-	std::string getTitle();
+	int getYear() const;
+	int getMonth() const;
+	int getDay() const;
+	int getHour() const;
+	int getLength() const;
+	std::string getTitle() const;
 
 private:
 	int year, month, day, hour, length;
 	std::string title;
 };
 
-class Calendar{
+class Calendar:CalendarBase{
 public:
 	Calendar();
 	Calendar(const Calendar&);
 
-	bool insert(int, int, int, int, int, std::string);
-	bool insert(std::string str);
-	int size();
+	bool insert(int year, int mon, int day, int hour, int length, const std::string &title);
+	bool insert(const std::string &);
+	int size() const;
 	void clear();
 
-	std::string inttostr(int);
+	vector<CalEvent> getEvents();
+	std::string inttostr(int) const;
+	int atoi(std::string) const;
+	void print();
 	
 	Calendar operator|=(const Calendar);
 	Calendar operator|(const Calendar);
 	Calendar operator=(const Calendar);
 
-	void to_string(){
-		for (unsigned int i = 0; i < events.size(); i++){
-			std::string temp = inttostr(events.at(i).getYear()) + "-" + inttostr(events.at(i).getMonth()) + "-" + inttostr(events.at(i).getDay()) + "T" + inttostr(events.at(i).getHour())
-				+ "/PT" + inttostr(events.at(i).getLength()) + "H " + events.at(i).getTitle() + "\n";
-			std::cout << temp;
-		}
-	}
-
 private:
+	void print(std::ostream &) const;
 	bool validYear(int);
 	bool validMonth(int);
 	bool validDay(int, int, int);
